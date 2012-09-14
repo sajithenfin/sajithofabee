@@ -120,7 +120,8 @@ class MySQLDatabase {
 	* @return object|bool $result
 	*/
 	public function find_by_condition($table_name,$key,$value="") {
-    	return $this->query("SELECT * FROM ".$table_name." WHERE ".$key."='".$value."' LIMIT 1");
+		$query = "SELECT * FROM ".$table_name." WHERE ".$key."='".$value."' LIMIT 1";
+    	return $this->query($query);
   	}
 	/**
 	* create
@@ -178,6 +179,89 @@ class MySQLDatabase {
 	  $sql .= " LIMIT 1";
 	  $this->query($sql);
 	  return ($this->affected_rows() == 1) ? true : false;
+	}
+	
+	/**
+	* join_table
+	*
+	* performs a join query
+	* @param string $table_name
+	* @param array $data conditions for joining
+	* @return object $result
+	*/
+	public function join_table($table_name,$data){
+		/*follow this format for data array
+			$data = array(
+				'tables'=>array(
+					'ofabee_unique_device'=>array('DID','device_id','name','model','version','key'),
+					'ofabee_age'=>array('age_range'),
+					'ofabee_gendar'=>array('type'),
+					'ofabee_country'=>array('country_name')
+				),
+				'join'=>array(
+					'ofabee_age'=>array('ofabee_unique_device.AGID','ofabee_age.AGID'),
+					'ofabee_gendar'=>array('ofabee_unique_device.GID','ofabee_gendar.GID'),
+					'ofabee_country'=>array('ofabee_unique_device.COID','ofabee_country.COID')
+				)
+			);
+		*/
+		$query = "SELECT ";
+		$last = end(end($data['tables']));
+		foreach ($data['tables'] as $table=>$columns){
+			foreach($columns as $count=>$column){
+				$query .= $table.".".$column;
+				if($column != $last)
+				$query.=",";
+			}
+		}
+		$query.=" FROM ".$table_name;
+		foreach($data['join'] as $table=>$condition){
+			$query.=" JOIN ".$table." ON ".$condition[0]."=".$condition[1];
+		}
+		return $this->query($query);
+	}
+	
+	/**
+	* join_table_where
+	*
+	* performs a join query
+	* @param string $table_name
+	* @param array $data conditions for joining
+	* @param string $table_key
+	* @param int $value
+	* @return object $result
+	*/
+	public function join_table_where($table_name,$data,$key,$value=""){
+		/*follow this format for data array
+			$data = array(
+				'tables'=>array(
+					'ofabee_unique_device'=>array('DID','device_id','name','model','version','key'),
+					'ofabee_age'=>array('age_range'),
+					'ofabee_gendar'=>array('type'),
+					'ofabee_country'=>array('country_name')
+				),
+				'join'=>array(
+					'ofabee_age'=>array('ofabee_unique_device.AGID','ofabee_age.AGID'),
+					'ofabee_gendar'=>array('ofabee_unique_device.GID','ofabee_gendar.GID'),
+					'ofabee_country'=>array('ofabee_unique_device.COID','ofabee_country.COID')
+				)
+			);
+		*/
+		$query = "SELECT ";
+		$last = end(end($data['tables']));
+		foreach ($data['tables'] as $table=>$columns){
+			foreach($columns as $count=>$column){
+				$query .= $table.".".$column;
+				if($column != $last)
+				$query.=",";
+			}
+		}
+		$query.=" FROM ".$table_name;
+		foreach($data['join'] as $table=>$condition){
+			$query.=" JOIN ".$table." ON ".$condition[0]."=".$condition[1];
+		}
+		$query.=" WHERE ".$key."=".$value;
+		return $this->query($query);
 	}
 
 	
