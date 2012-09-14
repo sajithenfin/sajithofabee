@@ -20,22 +20,35 @@ if(isset($_POST['dev_id'])){
 	$app_secret = $db->escape_value($_POST['app_secret']);
 	
 	//check Device ID is present in the database table developer_device_list
-	$result = $db->find_by_condition('ofabee_developer_device_list','device_id',$dev_id);
+	$result = $db->find_by_condition('ofabee_unique_device','device_id',$dev_id);
 	if($db->num_rows($result) == 1){
 		/*device is present, hence a user code should be generated
-		for that we need the user details from the tabel ofabee_user*/
-		while($device = $db->fetch_array($result))
-		$user_result = $db->find_by_condition('ofabee_user','UID',$device['UID']);
+		for that we need the details from the tabel ofabee_unique_device*/
+		//create an array for join query
+		$data = array(
+			'tables'=>array(
+				'ofabee_unique_device'=>array('DID','device_id','name','model','version','key'),
+				'ofabee_age'=>array('age_range'),
+				'ofabee_gendar'=>array('type'),
+				'ofabee_country'=>array('country_name')
+			),
+			'join'=>array(
+				'ofabee_age'=>array('ofabee_unique_device.AGID','ofabee_age.AGID'),
+				'ofabee_gendar'=>array('ofabee_unique_device.GID','ofabee_gendar.GID'),
+				'ofabee_country'=>array('ofabee_unique_device.COID','ofabee_country.COID')
+			)
+		);
+		$user_result = $db->join_table_where('ofabee_unique_device',$data,'device_id',$dev_id);
 		
 		//generate a user code and send it as reply
 		while($user = $db->fetch_array($user_result))
-		$user_code = $user['name']."|".$user['email']."|".$user['company_name']."|".$user['phone']."|".$user['date'];
+		$user_code = $user['DID']."_".$user['device_id']."_".$user['name']."_".$user['model']."_".$user['version']."_".$user['key']."_".$user['age_range']."_".$user['type']."_".$user['country_name'];
 		echo $user_code;
 		
 	}
 	else{
 		//device not present
-		echo "error: no user";
+		echo "error: no device";
 	}
 }
 ?>
