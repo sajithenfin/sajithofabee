@@ -1,0 +1,49 @@
+DELIMITER //
+CREATE PROCEDURE find_device_by_id(IN device_id_value INT(50))
+BEGIN
+SELECT * FROM ofabee_unique_device WHERE device_id= device_id_value;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE get_device_details(IN device_id_value INT(50))
+BEGIN
+SELECT ofabee_unique_device.DID,ofabee_unique_device.device_id,ofabee_unique_device.name,ofabee_unique_device.model,ofabee_unique_device.version,ofabee_unique_device.key,ofabee_age.age_range,ofabee_gendar.type,ofabee_country.country_name FROM ofabee_unique_device JOIN ofabee_age ON ofabee_unique_device.AGID=ofabee_age.AGID JOIN ofabee_gendar ON ofabee_unique_device.GID=ofabee_gendar.GID JOIN ofabee_country ON ofabee_unique_device.COID=ofabee_country.COID WHERE device_id= device_id_value;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE get_country_id_by_name(IN country_name_value VARCHAR(25))
+BEGIN
+SELECT COID FROM ofabee_country WHERE country_name = country_name_value LIMIT 1;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE get_device_support_id_by_type(IN device_type_value VARCHAR(25))
+BEGIN
+SELECT  DSID FROM ofabee_app_device_support WHERE suport = device_type_value LIMIT 1;
+END //
+DELIMITER ;
+
+
+
+DELIMITER $$
+CREATE PROCEDURE create_device(IN device_id_val INT(50) ,IN name_val INT(25) ,IN AGID_val INT(2) ,IN GID_val INT(2) ,IN model_val INT(20) ,IN version_val INT(10) ,IN key_val varchar(50) ,IN COID_val INT(2) ,IN icon_val varchar(150))
+BEGIN
+INSERT INTO ofabee_unique_device(`DID`,`device_id`,`name`,`AGID`,`GID`,`model`,`version`,`key`,`COID`,`icon`) VALUES (NULL,device_id_val ,name_val ,AGID_val ,GID_val ,model_val ,version_val ,key_val ,COID_val ,icon_val);
+END
+$$
+DELIMITER ;
+
+
+DELIMITER $$
+CREATE PROCEDURE create_device_without_icon(IN device_id_val INT(50) ,IN name_val INT(25) ,IN AGID_val INT(2) ,IN GID_val INT(2) ,IN model_val INT(20) ,IN version_val INT(10) ,IN key_val varchar(50) ,IN COID_val INT(2))
+BEGIN
+INSERT INTO ofabee_unique_device(`DID`,`device_id`,`name`,`AGID`,`GID`,`model`,`version`,`key`,`COID`,`icon`) VALUES (NULL,device_id_val ,name_val ,AGID_val ,GID_val ,model_val ,version_val ,key_val ,COID_val ,NULL);
+END
+$$
+DELIMITER ;

@@ -17,7 +17,14 @@ defined('LIB_PATH') ? null : define('LIB_PATH', SITE_ROOT.DS.'includes');
 require_once(LIB_PATH.DS.'config.php');
 
 //load database class file
-require_once(LIB_PATH.DS.'database.php');
+// New Connection
+$db = new mysqli(DB_SERVER,DB_USER,DB_PASS,DB_NAME);
+
+// Check for errors
+if(mysqli_connect_errno()){
+ echo mysqli_connect_error();
+}
+
 
 //loadig restrictions
 require_once(LIB_PATH.DS.'ofabee_restrictions.php');
